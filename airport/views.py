@@ -26,14 +26,13 @@ class AirportViewSet(viewsets.ModelViewSet):
     @action(methods=["POST"], detail=True, url_path="upload-image")
     def upload_image(self, request, pk=None):
         airport = self.get_object()
-        serializer = self.get_serializer_class(airport, data=request.data)
+        serializer = self.get_serializer(airport, data=request.data)
 
-        if serializer.validated_data:
+        if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 
 
 class RouteViewSet(viewsets.ModelViewSet):
@@ -154,7 +153,7 @@ class OrderViewSet(viewsets.ModelViewSet):
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
     pagination_class = OrderPagination
-    permission_classes = IsAuthenticated
+    permission_classes = [IsAuthenticated, ]
 
     def get_serializer_class(self):
         if self.action == "list":
