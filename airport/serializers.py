@@ -7,7 +7,13 @@ from airport.models import Airport, Route, AirplaneType, Airplane, Crew, Flight,
 class AirportSerializer(serializers.ModelSerializer):
     class Meta:
         model = Airport
-        fields = ["id", "name", "closest_big_city"]
+        fields = ["id", "name", "closest_big_city", "image"]
+
+
+class AirportImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Airport
+        fields = ["id", "image"]
 
 
 class RouteSerializer(serializers.ModelSerializer):

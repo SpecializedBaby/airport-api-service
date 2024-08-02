@@ -1,12 +1,24 @@
+import os
+import uuid
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.utils.text import slugify
 
 from airport_service import settings
+
+
+def create_custom_path(instance, filename):
+    _, extension = os.path.splitext(filename)
+    return os.path.join(
+        "uploads/images/",
+        f"{slugify(instance.title)}-{uuid.uuid4()}{extension}"
+    )
 
 
 class Airport(models.Model):
     name = models.CharField(max_length=255)
     closest_big_city = models.CharField(max_length=255)
+    image = models.ImageField(null=True, upload_to=create_custom_path)
 
     def __str__(self):
         return self.name
