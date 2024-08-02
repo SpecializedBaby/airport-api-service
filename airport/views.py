@@ -4,6 +4,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
 from django.db.models import Q, Count, F
 from datetime import datetime
+from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiParameter
 
 from airport.models import Airport, Route, AirplaneType, Airplane, Crew, Flight, Order
 from airport.pagination import OrderPagination
@@ -23,6 +24,15 @@ class AirportViewSet(viewsets.ModelViewSet):
 
         return AirportSerializer
 
+    @extend_schema(
+        summary="Upload Airport Image",
+        description="Upload an image for a specific airport",
+        request=AirportImageSerializer,
+        responses={
+            200: AirportImageSerializer,
+            400: "Validation Error"
+        }
+    )
     @action(methods=["POST"], detail=True, url_path="upload-image")
     def upload_image(self, request, pk=None):
         airport = self.get_object()
@@ -63,6 +73,30 @@ class RouteViewSet(viewsets.ModelViewSet):
 
         return queryset.distinct()
 
+    @extend_schema(
+        # extra parameters added to the schema
+        parameters=[
+            OpenApiParameter(
+                name="source",
+                description="Filter by source IDs",
+                required=False,
+                type=int
+            ),
+            OpenApiParameter(
+                name="destination",
+                description="Filter by destination IDs",
+                required=False,
+                type=int,
+            ),
+        ],
+        responses={200: RouteListSerializer(many=True)},
+        description="Retrieve a list of route, "
+                    "optionally filtered by source "
+                    "and destination.",
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
 
 class AirplaneTypeViewSet(viewsets.ModelViewSet):
     queryset = AirplaneType.objects.all()
@@ -96,6 +130,30 @@ class AirplaneViewSet(viewsets.ModelViewSet):
             queryset = queryset.select_related("airplane_type")
 
         return queryset.distinct()
+
+    @extend_schema(
+        # extra parameters added to the schema
+        parameters=[
+            OpenApiParameter(
+                name="name",
+                description="Filter by name",
+                required=False,
+                type=str
+            ),
+            OpenApiParameter(
+                name="airplane_type",
+                description="Filter by airplane type IDs",
+                required=False,
+                type=int,
+            ),
+        ],
+        responses={200: AirplaneListSerializer(many=True)},
+        description="Retrieve a list of airplane, "
+                    "optionally filtered by name "
+                    "and airplane type.",
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
 
 
 class CrewViewSet(viewsets.ModelViewSet):
@@ -147,6 +205,30 @@ class FlightViewSet(viewsets.ModelViewSet):
             )
 
         return queryset
+
+    @extend_schema(
+        # extra parameters added to the schema
+        parameters=[
+            OpenApiParameter(
+                name="source",
+                description="Filter by source IDs",
+                required=False,
+                type=int
+            ),
+            OpenApiParameter(
+                name="departure",
+                description="Filter by departure time",
+                required=False,
+                type=datetime,
+            ),
+        ],
+        responses={200: FlightListSerializer(many=True)},
+        description="Retrieve a list of flight, "
+                    "optionally filtered by source "
+                    "and departure_time.",
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
 
 
 class OrderViewSet(viewsets.ModelViewSet):
