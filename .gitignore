@@ -4,3 +4,5 @@
 **db.sqlite3
 .pytest_cache/
 .vscode/
+*.yaml
+media/
