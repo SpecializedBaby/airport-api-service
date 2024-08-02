@@ -1,8 +1,9 @@
 from rest_framework import viewsets
+from rest_framework.permissions import IsAuthenticated
 from django.db.models import Q, Count, F
 from datetime import datetime
 
-from airport.models import Airport, Route, AirplaneType, Airplane, Crew, Flight, Order, Ticket
+from airport.models import Airport, Route, AirplaneType, Airplane, Crew, Flight, Order
 from airport.pagination import OrderPagination
 from airport.serializers import AirportSerializer, RouteSerializer, AirplaneTypeSerializer, AirplaneSerializer, \
     CrewSerializer, FlightSerializer, OrderSerializer, RouteListSerializer, RouteDetailSerializer, \
@@ -132,6 +133,7 @@ class OrderViewSet(viewsets.ModelViewSet):
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
     pagination_class = OrderPagination
+    permission_classes = IsAuthenticated
 
     def get_serializer_class(self):
         if self.action == "list":
