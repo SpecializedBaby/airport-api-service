@@ -1,10 +1,10 @@
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.decorators import action
+from rest_framework.decorators import action as d_action
 from django.db.models import Q, Count, F
 from datetime import datetime
-from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiParameter
+from drf_spectacular.utils import extend_schema, OpenApiParameter
 
 from airport.models import Airport, Route, AirplaneType, Airplane, Crew, Flight, Order
 from airport.pagination import OrderPagination
@@ -33,7 +33,7 @@ class AirportViewSet(viewsets.ModelViewSet):
             400: "Validation Error"
         }
     )
-    @action(methods=["POST"], detail=True, url_path="upload-image")
+    @d_action(methods=["POST"], detail=True, url_path="upload-image")
     def upload_image(self, request, pk=None):
         airport = self.get_object()
         serializer = self.get_serializer(airport, data=request.data)
