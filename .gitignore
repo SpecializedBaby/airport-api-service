@@ -6,3 +6,6 @@
 .vscode/
 *.yaml
 media/
+.idea/
+*.iml
+.env
