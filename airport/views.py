@@ -63,10 +63,10 @@ class RouteViewSet(viewsets.ModelViewSet):
         destination = self.request.query_params.get("destination")
 
         if source:
-            queryset = queryset.filter(source__id=source)
+            queryset = queryset.filter(source__name__icontains=source)
 
         if destination:
-            queryset = queryset.filter(destination__id=destination)
+            queryset = queryset.filter(destination__name__icontains=destination)
 
         if self.action in ("list", "retrieve"):
             queryset = queryset.select_related("source", "destination")
@@ -175,16 +175,22 @@ class FlightViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         queryset = self.queryset
-        source = self.request.query_params.get("source")
-        departure_time = self.request.query_params.get("departure")
+        source = self.request.query_params.get("from")
+        destination = self.request.query_params("to")
+        departure_time = self.request.query_params.get("date_from")
+        arrival_time = self.request.query_params.get("date_to")
 
         filters = Q()
         if source:
-            filters &= Q(route__source__id=source)
+            filters &= Q(route__source__name__icontains=source)
+        if destination:
+            filters &= Q(route__destination__name_icontains=destination)
         if departure_time:
             time_obj = datetime.strptime(departure_time, "%Y-%m-%d").date()
             filters &= Q(departure_time__date=time_obj)
-
+        if arrival_time:
+            time_obj = datetime.strptime(arrival_time, "%Y-%m-%d").date()
+            filters &= Q(arrival_time__date=time_obj)
         if filters:
             queryset = queryset.filter(filters)
 
@@ -192,14 +198,14 @@ class FlightViewSet(viewsets.ModelViewSet):
             queryset = queryset.select_related("route", "airplane").prefetch_related("crews")
 
         if self.action == "list":
-            queryset =(
+            queryset = (
                 queryset
                 .select_related("route", "airplane")
                 .prefetch_related("crews")
                 .annotate(
                     tickets_available=(
-                        F("airplane__rows") * F("airplane__seats_in_row")
-                    ) - Count("tickets")
+                                              F("airplane__rows") * F("airplane__seats_in_row")
+                                      ) - Count("tickets")
                 )
                 .order_by("id")
             )
@@ -211,9 +217,15 @@ class FlightViewSet(viewsets.ModelViewSet):
         parameters=[
             OpenApiParameter(
                 name="source",
-                description="Filter by source IDs",
+                description="Filter by source name's",
                 required=False,
-                type=int
+                type=str
+            ),
+            OpenApiParameter(
+                name="destination",
+                description="Filter by destination name's",
+                required=False,
+                type=str
             ),
             OpenApiParameter(
                 name="departure",
@@ -221,11 +233,18 @@ class FlightViewSet(viewsets.ModelViewSet):
                 required=False,
                 type=datetime,
             ),
+            OpenApiParameter(
+                name="arrival",
+                description="Filter by arrival time",
+                required=False,
+                type=datetime,
+            ),
         ],
         responses={200: FlightListSerializer(many=True)},
         description="Retrieve a list of flight, "
-                    "optionally filtered by source "
-                    "and departure_time.",
+                    "optionally filtered by source, "
+                    "destination, departure time "
+                    "and arrival time.",
     )
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
