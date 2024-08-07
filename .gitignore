@@ -1,6 +1,19 @@
+# Python
 .venv
 .idea
 **__pycache__/
-**db.sqlite3
 .pytest_cache/
 .vscode/
+*.yaml
+media/
+.idea/
+*.iml
+.env
+
+# Docker
+*.log
+*.pid
+*.sqlite3
+*.pyc
+__pycache__
+db.sqlite3
