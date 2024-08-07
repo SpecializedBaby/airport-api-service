@@ -9,6 +9,7 @@ https://docs.djangoproject.com/en/5.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
+
 import os
 from datetime import timedelta
 from pathlib import Path
@@ -27,7 +28,7 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = bool(os.getenv("DEBUG", default=0))
 
-ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS").split(" ")
+ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "localhost").split(" ")
 
 INTERNAL_IPS = [
     "127.0.0.1",
