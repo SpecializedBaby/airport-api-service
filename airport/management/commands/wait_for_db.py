@@ -11,7 +11,7 @@ class Command(BaseCommand):
             "--db",
             type=str,
             default="default",
-            help="The name of the database connection to wait for"
+            help="The name of the database connection to wait for",
         )
 
     def handle(self, *args, **options):
@@ -30,7 +30,6 @@ class Command(BaseCommand):
                 )
                 time.sleep(1)
 
-        self.stdout.write(self.style.SUCCESS(
-            f"Database connection "
-            f"{db_conn_name} available!"
-        ))
+        self.stdout.write(
+            self.style.SUCCESS(f"Database connection " f"{db_conn_name} available!")
+        )

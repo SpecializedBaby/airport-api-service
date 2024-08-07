@@ -135,7 +135,7 @@ class AirportImageUploadTests(TestCase):
         self.route = Route.objects.create(
             source=self.source_airport,
             destination=self.destination_airport,
-            distance=5000
+            distance=5000,
         )
 
     def tearDown(self):

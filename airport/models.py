@@ -10,8 +10,7 @@ from airport_service import settings
 def create_custom_path(instance, filename):
     _, extension = os.path.splitext(filename)
     return os.path.join(
-        "uploads/images/",
-        f"{slugify(instance.name)}-{uuid.uuid4()}{extension}"
+        "uploads/images/", f"{slugify(instance.name)}-{uuid.uuid4()}{extension}"
     )
 
 
@@ -25,8 +24,12 @@ class Airport(models.Model):
 
 
 class Route(models.Model):
-    source = models.ForeignKey(Airport, on_delete=models.CASCADE, related_name="departing_routes")
-    destination = models.ForeignKey(Airport, on_delete=models.CASCADE, related_name="arriving_routes")
+    source = models.ForeignKey(
+        Airport, on_delete=models.CASCADE, related_name="departing_routes"
+    )
+    destination = models.ForeignKey(
+        Airport, on_delete=models.CASCADE, related_name="arriving_routes"
+    )
     distance = models.IntegerField()
 
     def __str__(self):
@@ -44,7 +47,9 @@ class Airplane(models.Model):
     name = models.CharField(max_length=255)
     rows = models.IntegerField()
     seats_in_row = models.IntegerField()
-    airplane_type = models.ForeignKey(AirplaneType, on_delete=models.CASCADE, related_name="airplanes")
+    airplane_type = models.ForeignKey(
+        AirplaneType, on_delete=models.CASCADE, related_name="airplanes"
+    )
 
     def __str__(self):
         return self.name + " " + self.airplane_type.name
@@ -103,9 +108,7 @@ class Ticket(models.Model):
             (row, "row", "rows"),
             (seat, "seat", "seats_in_row"),
         ]:
-            count_attrs = getattr(
-                flight.airplane, flight_attr_name
-            )
+            count_attrs = getattr(flight.airplane, flight_attr_name)
             if not (1 <= ticket_attr_value <= count_attrs):
                 raise error_to_raise(
                     {
@@ -114,24 +117,16 @@ class Ticket(models.Model):
                         f"(1, {flight_attr_name}): "
                         f"(1, {count_attrs})"
                     }
-
                 )
 
     def clean(self):
-        Ticket.validate_place(
-            self.row,
-            self.seat,
-            self.flight,
-            ValidationError
-        )
+        Ticket.validate_place(self.row, self.seat, self.flight, ValidationError)
 
     def save(
         self, force_insert=False, force_update=False, using=None, update_fields=None
     ):
         self.full_clean()
-        super(Ticket, self).save(
-            force_insert, force_update, using, update_fields
-        )
+        super(Ticket, self).save(force_insert, force_update, using, update_fields)
 
     def __str__(self):
         return f"{str(self.flight)} (row: {self.row}, seat: {self.seat})"

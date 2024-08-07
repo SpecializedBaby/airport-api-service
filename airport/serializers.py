@@ -1,7 +1,16 @@
 from rest_framework import serializers
 from django.db import transaction
 
-from airport.models import Airport, Route, AirplaneType, Airplane, Crew, Flight, Order, Ticket
+from airport.models import (
+    Airport,
+    Route,
+    AirplaneType,
+    Airplane,
+    Crew,
+    Flight,
+    Order,
+    Ticket,
+)
 
 
 class AirportSerializer(serializers.ModelSerializer):
@@ -74,22 +83,30 @@ class FlightListSerializer(FlightSerializer):
     source = serializers.CharField(source="route.source")
     destination = serializers.CharField(source="route.destination")
     airplane = serializers.CharField(source="airplane.name", read_only=True)
-    crews = serializers.SlugRelatedField(many=True, read_only=True, slug_field="full_name")
+    crews = serializers.SlugRelatedField(
+        many=True, read_only=True, slug_field="full_name"
+    )
     tickets_available = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Flight
-        fields = ["id", "source", "destination", "airplane", "departure_time", "arrival_time", "crews", "tickets_available", ]
+        fields = [
+            "id",
+            "source",
+            "destination",
+            "airplane",
+            "departure_time",
+            "arrival_time",
+            "crews",
+            "tickets_available",
+        ]
 
 
 class TicketSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         data = super(TicketSerializer, self).validate(attrs)
         Ticket.validate_place(
-            attrs["row"],
-            attrs["seat"],
-            attrs["flight"],
-            serializers.ValidationError
+            attrs["row"], attrs["seat"], attrs["flight"], serializers.ValidationError
         )
         return data
 
@@ -116,7 +133,15 @@ class FlightDetailSerializer(FlightSerializer):
 
     class Meta:
         model = Flight
-        fields = ["id", "route", "airplane", "departure_time", "arrival_time", "crews", "taken_places", ]
+        fields = [
+            "id",
+            "route",
+            "airplane",
+            "departure_time",
+            "arrival_time",
+            "crews",
+            "taken_places",
+        ]
 
 
 class OrderSerializer(serializers.ModelSerializer):

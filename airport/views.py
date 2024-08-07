@@ -8,10 +8,23 @@ from drf_spectacular.utils import extend_schema, OpenApiParameter
 
 from airport.models import Airport, Route, AirplaneType, Airplane, Crew, Flight, Order
 from airport.pagination import OrderPagination
-from airport.serializers import AirportSerializer, RouteSerializer, AirplaneTypeSerializer, AirplaneSerializer, \
-    CrewSerializer, FlightSerializer, OrderSerializer, RouteListSerializer, RouteDetailSerializer, \
-    AirplaneListSerializer, AirplaneDetailSerializer, FlightListSerializer, FlightDetailSerializer, OrderListSerializer, \
-    AirportImageSerializer
+from airport.serializers import (
+    AirportSerializer,
+    RouteSerializer,
+    AirplaneTypeSerializer,
+    AirplaneSerializer,
+    CrewSerializer,
+    FlightSerializer,
+    OrderSerializer,
+    RouteListSerializer,
+    RouteDetailSerializer,
+    AirplaneListSerializer,
+    AirplaneDetailSerializer,
+    FlightListSerializer,
+    FlightDetailSerializer,
+    OrderListSerializer,
+    AirportImageSerializer,
+)
 
 
 class AirportViewSet(viewsets.ModelViewSet):
@@ -28,10 +41,7 @@ class AirportViewSet(viewsets.ModelViewSet):
         summary="Upload Airport Image",
         description="Upload an image for a specific airport",
         request=AirportImageSerializer,
-        responses={
-            200: AirportImageSerializer,
-            400: "Validation Error"
-        }
+        responses={200: AirportImageSerializer, 400: "Validation Error"},
     )
     @d_action(methods=["POST"], detail=True, url_path="upload-image")
     def upload_image(self, request, pk=None):
@@ -80,7 +90,7 @@ class RouteViewSet(viewsets.ModelViewSet):
                 name="source",
                 description="Filter by source IDs",
                 required=False,
-                type=int
+                type=int,
             ),
             OpenApiParameter(
                 name="destination",
@@ -91,8 +101,8 @@ class RouteViewSet(viewsets.ModelViewSet):
         ],
         responses={200: RouteListSerializer(many=True)},
         description="Retrieve a list of route, "
-                    "optionally filtered by source "
-                    "and destination.",
+        "optionally filtered by source "
+        "and destination.",
     )
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
@@ -135,10 +145,7 @@ class AirplaneViewSet(viewsets.ModelViewSet):
         # extra parameters added to the schema
         parameters=[
             OpenApiParameter(
-                name="name",
-                description="Filter by name",
-                required=False,
-                type=str
+                name="name", description="Filter by name", required=False, type=str
             ),
             OpenApiParameter(
                 name="airplane_type",
@@ -149,8 +156,8 @@ class AirplaneViewSet(viewsets.ModelViewSet):
         ],
         responses={200: AirplaneListSerializer(many=True)},
         description="Retrieve a list of airplane, "
-                    "optionally filtered by name "
-                    "and airplane type.",
+        "optionally filtered by name "
+        "and airplane type.",
     )
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
@@ -195,17 +202,19 @@ class FlightViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(filters)
 
         if self.action == "retrieve":
-            queryset = queryset.select_related("route", "airplane").prefetch_related("crews")
+            queryset = queryset.select_related("route", "airplane").prefetch_related(
+                "crews"
+            )
 
         if self.action == "list":
             queryset = (
-                queryset
-                .select_related("route", "airplane")
+                queryset.select_related("route", "airplane")
                 .prefetch_related("crews")
                 .annotate(
                     tickets_available=(
-                                              F("airplane__rows") * F("airplane__seats_in_row")
-                                      ) - Count("tickets")
+                        F("airplane__rows") * F("airplane__seats_in_row")
+                    )
+                    - Count("tickets")
                 )
                 .order_by("id")
             )
@@ -219,13 +228,13 @@ class FlightViewSet(viewsets.ModelViewSet):
                 name="source",
                 description="Filter by source name's",
                 required=False,
-                type=str
+                type=str,
             ),
             OpenApiParameter(
                 name="destination",
                 description="Filter by destination name's",
                 required=False,
-                type=str
+                type=str,
             ),
             OpenApiParameter(
                 name="departure",
@@ -242,9 +251,9 @@ class FlightViewSet(viewsets.ModelViewSet):
         ],
         responses={200: FlightListSerializer(many=True)},
         description="Retrieve a list of flight, "
-                    "optionally filtered by source, "
-                    "destination, departure time "
-                    "and arrival time.",
+        "optionally filtered by source, "
+        "destination, departure time "
+        "and arrival time.",
     )
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
@@ -254,7 +263,9 @@ class OrderViewSet(viewsets.ModelViewSet):
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
     pagination_class = OrderPagination
-    permission_classes = [IsAuthenticated, ]
+    permission_classes = [
+        IsAuthenticated,
+    ]
 
     def get_serializer_class(self):
         if self.action == "list":
@@ -265,10 +276,8 @@ class OrderViewSet(viewsets.ModelViewSet):
         queryset = self.queryset.filter(user=self.request.user)
 
         if self.action in ("list", "retrieve"):
-            queryset = (
-                queryset
-                .select_related("user")
-                .prefetch_related("tickets__flight")
+            queryset = queryset.select_related("user").prefetch_related(
+                "tickets__flight"
             )
 
         order_id = self.request.query_params.get("order")
